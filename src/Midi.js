@@ -3,6 +3,7 @@ import Encoder from 'jsmidgen'
 import Util from './Util'
 import {Track} from './Track'
 import {parseHeader} from './Header'
+const fs = require('fs');
 
 /**
  * @class The Midi object. Contains tracks and the header info.
@@ -41,25 +42,18 @@ class Midi {
 	/**
 	 * Load the given url and parse the midi at that url
 	 * @param  {String}   url
-	 * @param {*} data Anything that should be sent in the XHR
-	 * @param {String} method Either GET or POST
 	 * @return {Promise}
 	 */
-	load(url, data=null, method='GET'){
+	load(url){
+		let self = this;
 		return new Promise((success, fail) => {
-			var request = new XMLHttpRequest()
-			request.open(method, url)
-			request.responseType = 'arraybuffer'
-			// decode asynchronously
-			request.addEventListener('load', () => {
-				if (request.readyState === 4 && request.status === 200){
-					success(this.decode(request.response))
-				} else {
-					fail(request.status)
-				}
-			})
-			request.addEventListener('error', fail)
-			request.send(data)
+			fs.readFile(url, (err, data) => {
+			    if (err) {
+			        fail(err)
+			    }
+
+			   success(self.decode(data))
+			});
 		})
 	}
 
@@ -69,14 +63,12 @@ class Midi {
 	 * @return {Midi}       this
 	 */
 	decode(bytes){
-
-		if (bytes instanceof ArrayBuffer){
+		// if (bytes instanceof ArrayBuffer){
 			var byteArray = new Uint8Array(bytes)
 			bytes = String.fromCharCode.apply(null, byteArray)
-		}
+		// }
 
-		const midiData = Decoder(bytes)
-
+		const midiData = Decoder(bytes);
 		this.header = parseHeader(midiData)
 
 		//replace the previous tracks

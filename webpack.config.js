@@ -32,5 +32,6 @@ module.exports = {
 			'NODE_ENV': JSON.stringify('production')
 		}
 	}),
+	target: 'node',
 	devtool: '#source-map'
 };
